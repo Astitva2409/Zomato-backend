@@ -1,5 +1,6 @@
 package com.astitva.zomatoBackend.ZomatoApp.config;
 
+import com.astitva.zomatoBackend.ZomatoApp.entities.enums.UserRole;
 import com.astitva.zomatoBackend.ZomatoApp.filters.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +33,10 @@ public class SecurityConfig {
         httpSecurity
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(publicRoutes).permitAll()
-                        .requestMatchers("/api/**").authenticated())
+                        .requestMatchers("/api/users/admin/**").hasRole(UserRole.ADMIN.name())
+                        .requestMatchers("/api/restaurant-owner/**").hasRole(UserRole.RESTAURANT_OWNER.name())
+                        .requestMatchers("/api/users/**").hasRole(UserRole.CUSTOMER.name())
+                        .anyRequest().authenticated())
                 .csrf(csrfconfig -> csrfconfig.disable())
                 .sessionManagement(sessionConfig -> sessionConfig
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -37,12 +37,12 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public void validateSession(String refreshToken) {
+    public Session validateSession(String refreshToken) {
         Session session = sessionRepository.findByRefreshToken(refreshToken)
                 .orElseThrow(() -> new SessionAuthenticationException("Session not found"));
 
         session.setLastUsedAt(LocalDateTime.now());
-        sessionRepository.save(session);
+        return sessionRepository.save(session);
     }
 
     @Override

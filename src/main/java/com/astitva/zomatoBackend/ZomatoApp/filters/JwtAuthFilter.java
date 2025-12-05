@@ -1,5 +1,6 @@
 package com.astitva.zomatoBackend.ZomatoApp.filters;
 
+import com.astitva.zomatoBackend.ZomatoApp.dto.UserResponse;
 import com.astitva.zomatoBackend.ZomatoApp.entities.User;
 import com.astitva.zomatoBackend.ZomatoApp.service.auth.JwtService;
 import com.astitva.zomatoBackend.ZomatoApp.service.auth.SessionService;
@@ -9,6 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.modelmapper.internal.bytebuddy.implementation.bytecode.ShiftRight;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,6 +28,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserService userService;
     private final SessionService sessionService;
+    private final ModelMapper modelMapper;
 
     @Autowired
     private HandlerExceptionResolver handlerExceptionResolver;
@@ -50,8 +53,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 return;
             }
 
+            if (!jwtService.isTokenValid(token)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             if (userId != null) {
-                User user = userService.getUserById(userId, userId);
+                UserResponse userResponse = userService.getUserById(userId, userId);
+                User user = modelMapper.map(userResponse, User.class);
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
 

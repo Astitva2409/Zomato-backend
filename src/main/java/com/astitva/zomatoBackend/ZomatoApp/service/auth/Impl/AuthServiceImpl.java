@@ -1,17 +1,18 @@
 package com.astitva.zomatoBackend.ZomatoApp.service.auth.Impl;
 
-import com.astitva.zomatoBackend.ZomatoApp.dto.AuthRequest;
-import com.astitva.zomatoBackend.ZomatoApp.dto.AuthResponse;
-import com.astitva.zomatoBackend.ZomatoApp.dto.RegisterUserRequest;
-import com.astitva.zomatoBackend.ZomatoApp.dto.UserResponse;
+import com.astitva.zomatoBackend.ZomatoApp.dto.*;
+import com.astitva.zomatoBackend.ZomatoApp.entities.Session;
 import com.astitva.zomatoBackend.ZomatoApp.entities.User;
 import com.astitva.zomatoBackend.ZomatoApp.entities.enums.UserRole;
 import com.astitva.zomatoBackend.ZomatoApp.exception.RuntimeConflictException;
 import com.astitva.zomatoBackend.ZomatoApp.exception.UnauthorizedException;
+import com.astitva.zomatoBackend.ZomatoApp.repository.SessionRepository;
 import com.astitva.zomatoBackend.ZomatoApp.repository.UserRepository;
 import com.astitva.zomatoBackend.ZomatoApp.service.auth.AuthService;
 import com.astitva.zomatoBackend.ZomatoApp.service.auth.JwtService;
 import com.astitva.zomatoBackend.ZomatoApp.service.auth.SessionService;
+import com.astitva.zomatoBackend.ZomatoApp.service.user.UserService;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.management.relation.Role;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Service
@@ -33,6 +35,8 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final SessionService sessionService;
+    private final UserService userService;
+    private final SessionRepository sessionRepository;
 
     @Override
     public UserResponse register(RegisterUserRequest request) {
@@ -43,6 +47,10 @@ public class AuthServiceImpl implements AuthService {
         User mappedUser = modelMapper.map(request, User.class);
         mappedUser.setRole(Set.of(UserRole.CUSTOMER));
         mappedUser.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        if(mappedUser.getRole().contains(UserRole.ADMIN)) {
+            throw new UnauthorizedException("Admin registration is not allowed.");
+        }
 
         User savedUser = userRepository.save(mappedUser);
 
@@ -67,5 +75,26 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             throw new UnauthorizedException("Invalid email or password");
         }
+    }
+
+    @Override
+    public AuthResponse refresh(String refreshToken) {
+        Session session = sessionService.validateSession(refreshToken);
+        Long userId = jwtService.getUserIdFromToken(refreshToken);
+        UserResponse userResponse = userService.getUserById(userId, userId);
+        User user = modelMapper.map(userResponse, User.class);
+        String accessToken = jwtService.generateAccessToken(user);
+
+
+        session.setLastUsedAt(LocalDateTime.now());
+        session.setAccessToken(accessToken);
+        sessionRepository.save(session);
+        return new AuthResponse(userId, accessToken, refreshToken);
+    }
+
+    @Override
+    public LogoutResponse logout(String refreshToken) {
+        sessionService.deleteSession(refreshToken);
+        return new LogoutResponse("User logged out successfully");
     }
 }
