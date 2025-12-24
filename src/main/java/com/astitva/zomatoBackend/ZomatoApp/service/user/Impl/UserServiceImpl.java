@@ -64,9 +64,9 @@ public class UserServiceImpl implements UserService {
 
         UserResponse response = modelMapper.map(user, UserResponse.class);
 
-        List<Address> addressResponses = user.getAddresses()
+        List<AddressResponse> addressResponses = user.getAddresses()
                 .stream()
-                .map(address -> modelMapper.map(address, Address.class))
+                .map(address -> modelMapper.map(address, AddressResponse.class))
                 .toList();
 
         response.setAddresses(addressResponses);

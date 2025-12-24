@@ -20,8 +20,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import javax.management.relation.Role;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -53,7 +51,6 @@ public class AuthServiceImpl implements AuthService {
         }
 
         User savedUser = userRepository.save(mappedUser);
-
         return modelMapper.map(savedUser, UserResponse.class);
     }
 

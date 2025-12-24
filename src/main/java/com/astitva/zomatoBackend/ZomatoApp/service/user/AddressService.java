@@ -5,7 +5,7 @@ import com.astitva.zomatoBackend.ZomatoApp.dto.CreateAddressRequest;
 import java.util.List;
 
 public interface AddressService {
-    AddressResponse addAddress(Long userId, CreateAddressRequest request);
+    AddressResponse addAddress(Long userId, Long requesterId, CreateAddressRequest request);
 
     List<AddressResponse> getAddressesByUser(Long userId);
 
