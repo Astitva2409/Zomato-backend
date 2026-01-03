@@ -1,7 +1,6 @@
 package com.astitva.zomatoBackend.ZomatoApp.service.auth;
 
 import com.astitva.zomatoBackend.ZomatoApp.entities.User;
-import javax.crypto.SecretKey;
 
 public interface JwtService {
     String generateAccessToken(User user);

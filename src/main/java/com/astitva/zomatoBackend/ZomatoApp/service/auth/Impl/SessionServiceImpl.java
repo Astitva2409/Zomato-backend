@@ -7,7 +7,6 @@ import com.astitva.zomatoBackend.ZomatoApp.service.auth.SessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.web.authentication.session.SessionAuthenticationException;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;

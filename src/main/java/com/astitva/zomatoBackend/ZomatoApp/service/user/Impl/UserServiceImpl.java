@@ -2,9 +2,7 @@ package com.astitva.zomatoBackend.ZomatoApp.service.user.Impl;
 
 import com.astitva.zomatoBackend.ZomatoApp.dto.AddressResponse;
 import com.astitva.zomatoBackend.ZomatoApp.dto.LogoutResponse;
-import com.astitva.zomatoBackend.ZomatoApp.dto.RegisterUserRequest;
 import com.astitva.zomatoBackend.ZomatoApp.dto.UserResponse;
-import com.astitva.zomatoBackend.ZomatoApp.entities.Address;
 import com.astitva.zomatoBackend.ZomatoApp.entities.User;
 import com.astitva.zomatoBackend.ZomatoApp.entities.enums.UserRole;
 import com.astitva.zomatoBackend.ZomatoApp.exception.ResourceNotFoundException;
@@ -15,16 +13,12 @@ import com.astitva.zomatoBackend.ZomatoApp.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -49,18 +43,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserResponse getUserById(Long userId, Long requesterUserId) {
-        User requester = userRepository.findById(requesterUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("Requester not found"));
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-        // User can view only their own profile OR admin can
-        if (!requester.getId().equals(user.getId()) &&
-                !requester.getRole().contains(UserRole.ADMIN)) {
-            throw new UnauthorizedException("Not allowed to view this user");
-        }
+    public UserResponse getUserById(Long userId) {
+        User user = loadUserEntity(userId);
 
         UserResponse response = modelMapper.map(user, UserResponse.class);
 
@@ -75,9 +59,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserResponse> getAllUsers(Pageable pageable, Long adminUserId) {
-        validateAdmin(adminUserId);
-
+    public List<UserResponse> getAllUsers(Pageable pageable) {
         List<User> usersPage = userRepository.findAll(pageable).getContent();
 
         return usersPage.stream()
@@ -97,16 +79,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public LogoutResponse deleteUser(Long userId, Long adminUserId) {
-        validateAdmin(adminUserId);
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-        if(Objects.equals(user.getId(), adminUserId)) {
-            throw new UnauthorizedException("Admin cannot be deleted");
-        }
-
+    public LogoutResponse deleteUser(Long userId) {
+        User user = loadUserEntity(userId);
         sessionRepository.deleteAll(sessionRepository.findByUser(user));
         userRepository.delete(user);
 
@@ -114,14 +88,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUserRole(Long userId, UserRole newRole, Long adminUserId) {
+    public UserResponse updateUserRole(Long userId, UserRole newRole) {
+        User user = loadUserEntity(userId);
+        user.getRole().add(newRole);
+        userRepository.save(user);
 
-        validateAdmin(adminUserId);
-
-        if (newRole == UserRole.ADMIN) {
-            throw new UnauthorizedException("Creating a new admin is not allowed.");
-        }
-
+        return modelMapper.map(user, UserResponse.class);
     }
 
     @Override

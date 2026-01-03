@@ -1,7 +1,6 @@
 package com.astitva.zomatoBackend.ZomatoApp.entities;
 
 import com.astitva.zomatoBackend.ZomatoApp.entities.enums.MenuCategory;
-import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

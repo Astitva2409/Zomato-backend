@@ -11,14 +11,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.internal.bytebuddy.implementation.bytecode.ShiftRight;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-
 import java.io.IOException;
 
 @Component
@@ -59,7 +57,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
 
             if (userId != null) {
-                UserResponse userResponse = userService.getUserById(userId, userId);
+                UserResponse userResponse = userService.getUserById(userId);
                 User user = modelMapper.map(userResponse, User.class);
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());

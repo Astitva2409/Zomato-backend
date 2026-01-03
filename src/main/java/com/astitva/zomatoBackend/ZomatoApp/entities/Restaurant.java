@@ -2,6 +2,7 @@ package com.astitva.zomatoBackend.ZomatoApp.entities;
 
 import com.astitva.zomatoBackend.ZomatoApp.entities.enums.RestaurantStatus;
 import com.astitva.zomatoBackend.ZomatoApp.entities.enums.RestaurantType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -49,8 +50,9 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MenuItem> menuItems;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "owner_id", nullable = false)
+    @JsonIgnore
     private User owner;
 
     @CreationTimestamp

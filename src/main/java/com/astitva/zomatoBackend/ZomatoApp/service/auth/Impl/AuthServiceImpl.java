@@ -12,7 +12,6 @@ import com.astitva.zomatoBackend.ZomatoApp.service.auth.AuthService;
 import com.astitva.zomatoBackend.ZomatoApp.service.auth.JwtService;
 import com.astitva.zomatoBackend.ZomatoApp.service.auth.SessionService;
 import com.astitva.zomatoBackend.ZomatoApp.service.user.UserService;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -78,10 +78,9 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse refresh(String refreshToken) {
         Session session = sessionService.validateSession(refreshToken);
         Long userId = jwtService.getUserIdFromToken(refreshToken);
-        UserResponse userResponse = userService.getUserById(userId, userId);
+        UserResponse userResponse = userService.getUserById(userId);
         User user = modelMapper.map(userResponse, User.class);
         String accessToken = jwtService.generateAccessToken(user);
-
 
         session.setLastUsedAt(LocalDateTime.now());
         session.setAccessToken(accessToken);

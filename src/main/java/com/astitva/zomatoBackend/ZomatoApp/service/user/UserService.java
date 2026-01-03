@@ -1,7 +1,6 @@
 package com.astitva.zomatoBackend.ZomatoApp.service.user;
 
 import com.astitva.zomatoBackend.ZomatoApp.dto.LogoutResponse;
-import com.astitva.zomatoBackend.ZomatoApp.dto.RegisterUserRequest;
 import com.astitva.zomatoBackend.ZomatoApp.dto.UserResponse;
 import com.astitva.zomatoBackend.ZomatoApp.entities.User;
 import com.astitva.zomatoBackend.ZomatoApp.entities.enums.UserRole;
@@ -15,16 +14,16 @@ public interface UserService {
     User loadUserEntity(Long userId);
 
     // A user can view their own profile; admin can view any user
-    UserResponse getUserById(Long userId, Long requesterUserId);
+    UserResponse getUserById(Long userId);
 
     // admin only
-    List<UserResponse> getAllUsers(Pageable pageable, Long adminUserId);
+    List<UserResponse> getAllUsers(Pageable pageable);
 
     // admin only
-    LogoutResponse deleteUser(Long userId, Long adminUserId);
+    LogoutResponse deleteUser(Long userId);
 
     // ADMIN only
-    void updateUserRole(Long userId, UserRole newRole, Long adminUserId);
+    UserResponse updateUserRole(Long userId, UserRole newRole);
 
     // ADMIN only
     Page<UserResponse> getUsersByRole(UserRole role, Pageable pageable, Long adminUserId);

@@ -10,10 +10,16 @@ import com.astitva.zomatoBackend.ZomatoApp.repository.AddressRepository;
 import com.astitva.zomatoBackend.ZomatoApp.repository.UserRepository;
 import com.astitva.zomatoBackend.ZomatoApp.service.user.AddressService;
 import lombok.RequiredArgsConstructor;
+import org.apache.el.util.ReflectionUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,17 +29,13 @@ public class AddressServiceImpl implements AddressService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
-    /** Only the requester can manage their own addresses */
-    private void validateUser(Long userId, Long requesterId) {
-        if (!userId.equals(requesterId)) {
-            throw new UnauthorizedException("You cannot manage another user's addresses");
-        }
+    private Address findAddressById(Long addressId) {
+        return addressRepository.findById(addressId)
+                .orElseThrow(() -> new ResourceNotFoundException("Address Not found"));
     }
 
     @Override
     public AddressResponse addAddress(Long userId, Long requesterId, CreateAddressRequest request) {
-        validateUser(userId, requesterId);
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -46,16 +48,32 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public List<AddressResponse> getAddressesByUser(Long userId) {
-        return List.of();
+        List<Address> addresses = addressRepository.findByUserId(userId);
+
+        return addresses
+                .stream()
+                .map(address -> modelMapper.map(address, AddressResponse.class))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public AddressResponse updateAddress(Long addressId, CreateAddressRequest request, Long requesterUserId) {
-        return null;
+    public AddressResponse updateAddress(Long addressId, Map<String, Object> request, Long requesterUserId) {
+        Address address = findAddressById(addressId);
+
+        request.forEach((field, value) -> {
+            Field field1 = ReflectionUtils.findField(Address.class, field);
+            field1.setAccessible(true);
+            ReflectionUtils.setField(field1, address, value);
+        });
+
+        Address updatedAddress = addressRepository.save(address);
+        return modelMapper.map(updatedAddress, AddressResponse.class);
     }
 
     @Override
-    public void deleteAddress(Long addressId, Long requesterUserId) {
-
+    public boolean deleteAddress(Long addressId, Long requesterUserId) {
+        Address address = findAddressById(addressId);
+        addressRepository.delete(address);
+        return true;
     }
 }

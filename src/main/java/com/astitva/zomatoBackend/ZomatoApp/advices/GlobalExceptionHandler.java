@@ -14,12 +14,13 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    private ResponseEntity<ApiResponse<?>> buildResponseEntity(ApiError apiError) {
+
+    private ResponseEntity<ApiResponse<ApiError>> buildResponseEntity(ApiError apiError) {
         return new ResponseEntity<>(new ApiResponse<>(apiError), apiError.getStatus());
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiResponse<?>> handleEmployeeNotFound(ResourceNotFoundException exception) {
+    public ResponseEntity<ApiResponse<ApiError>> handleResourceNotFound(ResourceNotFoundException exception) {
         ApiError apiError = ApiError.builder()
                 .status(HttpStatus.NOT_FOUND)
                 .message(exception.getMessage())
@@ -28,7 +29,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(RuntimeConflictException.class)
-    public ResponseEntity<ApiResponse<?>> handleRuntimeConflictException(RuntimeConflictException exception) {
+    public ResponseEntity<ApiResponse<ApiError>> handleRuntimeConflictException(RuntimeConflictException exception) {
         ApiError apiError = ApiError.builder()
                 .status(HttpStatus.CONFLICT)
                 .message(exception.getMessage())
@@ -37,7 +38,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ApiResponse<?>> handleUnauthorizedException(UnauthorizedException exception) {
+    public ResponseEntity<ApiResponse<ApiError>> handleUnauthorizedException(UnauthorizedException exception) {
         ApiError apiError = ApiError.builder()
                 .status(HttpStatus.UNAUTHORIZED)
                 .message(exception.getMessage())
@@ -46,7 +47,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<?>> handleInternalServerError(Exception exception) {
+    public ResponseEntity<ApiResponse<ApiError>> handleInternalServerError(Exception exception) {
         ApiError apiError = ApiError.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .message(exception.getMessage())
@@ -55,7 +56,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<?>> handleInputValidationError(MethodArgumentNotValidException exception) {
+    public ResponseEntity<ApiResponse<ApiError>> handleInputValidationError(MethodArgumentNotValidException exception) {
         List<String> errors = exception
                 .getBindingResult()
                 .getAllErrors()

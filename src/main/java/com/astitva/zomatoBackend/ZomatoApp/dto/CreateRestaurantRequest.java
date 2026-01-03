@@ -19,6 +19,8 @@ public class CreateRestaurantRequest {
     @NotBlank
     private String address;
 
+    private Double rating;
+
     private RestaurantType type;
 
     private RestaurantStatus restaurantStatus;
