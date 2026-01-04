@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class DeleteRestaurantResponse {
+public class DeleteResponse {
     private String message;
 }

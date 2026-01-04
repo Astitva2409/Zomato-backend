@@ -1,8 +1,9 @@
 package com.astitva.zomatoBackend.ZomatoApp.service.restaurant;
 
 import com.astitva.zomatoBackend.ZomatoApp.dto.CreateRestaurantRequest;
-import com.astitva.zomatoBackend.ZomatoApp.dto.DeleteRestaurantResponse;
+import com.astitva.zomatoBackend.ZomatoApp.dto.DeleteResponse;
 import com.astitva.zomatoBackend.ZomatoApp.dto.RestaurantResponse;
+import com.astitva.zomatoBackend.ZomatoApp.entities.Restaurant;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
@@ -44,10 +45,24 @@ public interface RestaurantService {
      * Delete a restaurant
      * NOTE: Authorization check is done in controller
      */
-    DeleteRestaurantResponse deleteRestaurant(Long restaurantId);
+    DeleteResponse deleteRestaurant(Long restaurantId);
 
     /**
      * Get restaurants owned by a specific user
      */
     List<RestaurantResponse> getRestaurantsByOwner(Long ownerId);
+
+
+    // ← NEW HELPER METHODS FOR OTHER SERVICES
+    /**
+     * Helper method: Get restaurant or throw exception
+     * Used by MenuItemService and other modules
+     */
+    Restaurant getRestaurantOrThrow(Long restaurantId);
+
+    /**
+     * Helper method: Verify restaurant ownership
+     * Used by MenuItemService and other modules
+     */
+    void verifyRestaurantOwnership(Long restaurantId, Long userId);
 }

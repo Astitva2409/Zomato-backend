@@ -4,6 +4,7 @@ import com.astitva.zomatoBackend.ZomatoApp.dto.*;
 import com.astitva.zomatoBackend.ZomatoApp.entities.Restaurant;
 import com.astitva.zomatoBackend.ZomatoApp.entities.User;
 import com.astitva.zomatoBackend.ZomatoApp.exception.ResourceNotFoundException;
+import com.astitva.zomatoBackend.ZomatoApp.exception.UnauthorizedException;
 import com.astitva.zomatoBackend.ZomatoApp.repository.RestaurantRepository;
 import com.astitva.zomatoBackend.ZomatoApp.repository.UserRepository;
 import com.astitva.zomatoBackend.ZomatoApp.service.restaurant.RestaurantService;
@@ -94,7 +95,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     @Transactional(readOnly = true)
     public List<RestaurantResponse> getAllRestaurants(Pageable pageable) {
-        // ✅ FIXED: Use convertToResponse helper for each restaurant
+        // FIXED: Use convertToResponse helper for each restaurant
         return restaurantRepository.findAll(pageable)
                 .map(this::convertToResponse)
                 .getContent();
@@ -128,7 +129,7 @@ public class RestaurantServiceImpl implements RestaurantService {
 
     @Override
     @Transactional
-    public DeleteRestaurantResponse deleteRestaurant(Long restaurantId) {
+    public DeleteResponse deleteRestaurant(Long restaurantId) {
         // Find restaurant
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
@@ -137,7 +138,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         restaurantRepository.delete(restaurant);
 
         // Return success message
-        return DeleteRestaurantResponse.builder()
+        return DeleteResponse.builder()
                 .message("Restaurant deleted successfully")
                 .build();
     }
@@ -152,5 +153,19 @@ public class RestaurantServiceImpl implements RestaurantService {
         return restaurants.stream()
                 .map(this::convertToResponse)
                 .toList();
+    }
+
+    @Override
+    public Restaurant getRestaurantOrThrow(Long restaurantId) {
+        return restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
+    }
+
+    @Override
+    public void verifyRestaurantOwnership(Long restaurantId, Long userId) {
+        Restaurant restaurant = getRestaurantOrThrow(restaurantId);
+        if (!restaurant.getOwner().getId().equals(userId)) {
+            throw new UnauthorizedException("You can only manage your own restaurants");
+        }
     }
 }

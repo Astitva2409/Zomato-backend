@@ -1,7 +1,7 @@
 package com.astitva.zomatoBackend.ZomatoApp.controller;
 
 import com.astitva.zomatoBackend.ZomatoApp.dto.CreateRestaurantRequest;
-import com.astitva.zomatoBackend.ZomatoApp.dto.DeleteRestaurantResponse;
+import com.astitva.zomatoBackend.ZomatoApp.dto.DeleteResponse;
 import com.astitva.zomatoBackend.ZomatoApp.dto.RestaurantResponse;
 import com.astitva.zomatoBackend.ZomatoApp.entities.User;
 import com.astitva.zomatoBackend.ZomatoApp.entities.enums.UserRole;
@@ -109,7 +109,7 @@ public class RestaurantController {
      * Authorization: Only the owner can delete their restaurant
      */
     @DeleteMapping("/{restaurantId}")
-    public ResponseEntity<DeleteRestaurantResponse> deleteRestaurant(
+    public ResponseEntity<DeleteResponse> deleteRestaurant(
             @PathVariable Long restaurantId,
             Authentication authentication) {
         User user = (User) authentication.getPrincipal();
@@ -121,7 +121,7 @@ public class RestaurantController {
             throw new UnauthorizedException("You can only delete your own restaurants");
         }
 
-        DeleteRestaurantResponse deleteRestaurantResponse = restaurantService.deleteRestaurant(restaurantId);
+        DeleteResponse deleteRestaurantResponse = restaurantService.deleteRestaurant(restaurantId);
         return ResponseEntity.ok(deleteRestaurantResponse);
     }
 }
