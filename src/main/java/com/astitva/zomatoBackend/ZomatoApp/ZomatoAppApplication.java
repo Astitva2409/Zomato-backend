@@ -9,5 +9,4 @@ public class ZomatoAppApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ZomatoAppApplication.class, args);
 	}
-
 }

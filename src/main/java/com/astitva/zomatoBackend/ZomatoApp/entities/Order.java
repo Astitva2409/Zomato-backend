@@ -17,7 +17,6 @@ import java.util.List;
 @Data
 @Table(name = "orders")
 public class Order {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -47,6 +46,10 @@ public class Order {
 
     @Column(nullable = false)
     private boolean isPaid;
+
+    // ✅ NEW: Store charges breakdown as JSON string
+    @Column(columnDefinition = "TEXT")
+    private String chargesBreakdown;
 
     // Delivery address can be stored per order (at time of ordering)
     @Column(nullable = false, length = 200)

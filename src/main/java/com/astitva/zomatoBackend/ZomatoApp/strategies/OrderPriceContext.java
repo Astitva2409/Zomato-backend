@@ -10,11 +10,14 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 public class OrderPriceContext {
+    private Long userId;                    // NOT User object
+    private Long restaurantId;              // NOT Restaurant object
 
-    private double cartValue;
-    private User user;
-    private Restaurant restaurant;
-    private LocalDateTime orderTime;
-    private int totalItems;
-    private boolean isPeakHours;
+    // Computed/extracted values
+    private double cartValue;               // Sum of items
+    private LocalDateTime orderTime;        // Order placement time
+    private int totalItems;                 // Item count
+    private boolean isPeakHours;            // Calculated boolean
+    private String deliveryCity;            // Extracted from address
+
 }
